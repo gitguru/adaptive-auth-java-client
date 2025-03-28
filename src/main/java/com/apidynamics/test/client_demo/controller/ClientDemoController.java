@@ -82,7 +82,7 @@ public class ClientDemoController {
             totp = totpFromServerResult.getSecond().get("totp").toString();
         }
 
-        Pair<HttpStatusCode, Map<String, Object>> totpValidationResult = demoServerApiService.validateAdaptiveClientTotp(transactionId, totp);
+        Pair<HttpStatusCode, Map<String, Object>> totpValidationResult = demoServerApiService.validateClientTotp(transactionId, totp);
         HttpStatusCode totpValidationStatusCode = totpValidationResult.getFirst();
         Map<String, Object> totpValidationResponseBody = totpValidationResult.getSecond();
 

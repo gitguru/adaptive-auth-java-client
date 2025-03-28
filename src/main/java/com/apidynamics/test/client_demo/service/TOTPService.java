@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.util.Pair;
 import org.springframework.http.*;
@@ -30,12 +31,15 @@ public class TOTPService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TOTPService.class);
 
+    @Value("${DEMO_SERVER_BASE_URL:http://localhost:8080}")
+    private String demoServerBaseURL;
+
     private final ClientIdService clientIdService;
-    private final RestTemplate restTemplate;
+    private final RestTemplate demoServerRestTemplate;
 
     @Autowired
-    public TOTPService(@Qualifier("adaptiveRestTemplate") RestTemplate restTemplate, ClientIdService clientIdService) {
-        this.restTemplate = restTemplate;
+    public TOTPService(@Qualifier("demoServerRestTemplate") RestTemplate demoServerRestTemplate, ClientIdService clientIdService) {
+        this.demoServerRestTemplate = demoServerRestTemplate;
         this.clientIdService = clientIdService;
     }
 
@@ -144,6 +148,8 @@ public class TOTPService {
     }
 
     /**
+     * TODO : Move this to DemoServerApiService
+     *
      * Get a OTP token from Adaptive Authentication server
      * @param transactionId - Current adaptive transaction id
      * @return - Adaptive Authentication Server response
@@ -154,7 +160,7 @@ public class TOTPService {
         headers.add("X-API-Dynamics-Client-Id", clientIdService.getClientId());
         HttpEntity<?> entity = new HttpEntity<>(headers);
         ParameterizedTypeReference<Map<String, Object>> responseType = new ParameterizedTypeReference<>() {};
-        ResponseEntity<Map<String, Object>> response = restTemplate.exchange("/totp/client/generate?tid={transactionId}", HttpMethod.GET, entity, responseType, transactionId);
+        ResponseEntity<Map<String, Object>> response = demoServerRestTemplate.exchange(demoServerBaseURL + "/adaptiveAuthentication/generateClientTotp?tid={transactionId}", HttpMethod.GET, entity, responseType, transactionId);
         return Pair.of(response.getStatusCode(), response.getBody());
     }
 }

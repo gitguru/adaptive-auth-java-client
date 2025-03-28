@@ -47,7 +47,7 @@ public class DemoServerApiService {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = requestAttributes.getRequest();
 
-        request.getHeaderNames().asIterator().forEachRemaining(header -> LOG.debug("request.getHeader({}) ======> {}", header, request.getHeader(header)));
+//        request.getHeaderNames().asIterator().forEachRemaining(header -> LOG.debug("request.getHeader({}) ======> {}", header, request.getHeader(header)));
 
         HttpHeaders httpHeaders = Collections.list(request.getHeaderNames())
                 .stream()
@@ -69,14 +69,14 @@ public class DemoServerApiService {
      * @param totp - Self or Server generated TOTP token
      * @return - Demo server response
      */
-    public Pair<HttpStatusCode, Map<String, Object>> validateAdaptiveClientTotp(String transactionId, String totp) {
+    public Pair<HttpStatusCode, Map<String, Object>> validateClientTotp(String transactionId, String totp) {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.add("X-API-Dynamics-Client-Id", clientIdService.getClientId());
         HttpEntity<?> entity = new HttpEntity<>(headers);
         Map<String, String> uriVariables = Map.of("transactionId", transactionId, "totp", totp);
         ParameterizedTypeReference<Map<String, Object>> responseType = new ParameterizedTypeReference<>() {};
-        ResponseEntity<Map<String, Object>> response = demoServerRestTemplate.exchange(demoServerBaseURL + "/validateAdaptiveClientTotp?tid={transactionId}&totp={totp}", HttpMethod.GET, entity, responseType, uriVariables);
+        ResponseEntity<Map<String, Object>> response = demoServerRestTemplate.exchange(demoServerBaseURL + "/adaptiveAuthentication/validateClientTotp?tid={transactionId}&totp={totp}", HttpMethod.GET, entity, responseType, uriVariables);
         return Pair.of(response.getStatusCode(), response.getBody());
     }
 
